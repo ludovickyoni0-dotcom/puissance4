@@ -262,10 +262,49 @@ def clic(event):
     if 0 <= colonne < COLONNES:
         jouer(colonne)
 
-
 # Quand on clique sur la grille
 canvas.bind("<Button-1>", clic)
 
 dessiner_grille()
 
 fenetre.mainloop()
+ 
+def play(grille):
+    LIGNES = len(grille)
+    COLONNES = len(grille[0])
+    joueur_actuel = 1
+    symboles = {1: 'X', 2: 'O'}
+
+    while True:
+        symbole = symboles[joueur_actuel]
+
+        if joueur_actuel == 1:
+            # Joueur humain : on demande la colonne
+            while True:
+                col = int(input(f"Joueur {joueur_actuel} ({symbole}), choisis une colonne (0-{COLONNES-1}) : "))
+                if 0 <= col < COLONNES and grille[0][col] == '.':
+                    break
+                print("Colonne invalide ou pleine, réessaie.")
+        else:
+            # Joueur IA : on laisse l'algorithme choisir
+            print("L'IA réfléchit...")
+            col = meilleur_coup_ia(grille, symbole_ia='O', symbole_adverse='X',
+                                    verifier_victoire=verifier_victoire)
+
+        # Le reste ne change pas
+        for ligne in range(LIGNES - 1, -1, -1):
+            if grille[ligne][col] == '.':
+                grille[ligne][col] = symbole
+                break
+
+        afficher_grille(grille)
+
+        if verifier_victoire(grille, symbole):
+            print(f"🎉 Le joueur {joueur_actuel} a gagné !")
+            break
+
+        if all(grille[0][c] != '.' for c in range(COLONNES)):
+            print("Match nul, grille pleine !")
+            break
+
+        joueur_actuel = 2 if joueur_actuel == 1 else 1
